@@ -77,7 +77,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
 
     # Get all workbooks on site
     @api(version="2.0")
-    def get(self, req_options: Optional["RequestOptions"] = None) -> tuple[list[WorkbookItem], PaginationItem]:
+    def get(self, req_options: "RequestOptions | None" = None) -> tuple[list[WorkbookItem], PaginationItem]:
         """
         Queries the server and returns information about the workbooks the site.
 
@@ -162,7 +162,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         workbook_item: WorkbookItem,
         encrypt: bool = False,
         includeAll: bool = True,
-        datasources: Optional[list["DatasourceItem"]] = None,
+        datasources: list["DatasourceItem"] | None = None,
     ) -> JobItem:
         """
         Create one or more extracts on 1 workbook, optionally encrypted.
@@ -342,9 +342,9 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         workbook_item: WorkbookItem,
         connection_luids: Iterable[str],
         authentication_type: str,
-        username: Optional[str] = None,
-        password: Optional[str] = None,
-        embed_password: Optional[bool] = None,
+        username: str | None = None,
+        password: str | None = None,
+        embed_password: bool | None = None,
     ) -> list[ConnectionItem]:
         """
         Bulk updates one or more workbook connections by LUID, including authenticationType, username, password, and embedPassword.
@@ -407,7 +407,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
     def download(
         self,
         workbook_id: str,
-        filepath: Optional[FilePath] = None,
+        filepath: FilePath | None = None,
         include_extract: bool = True,
     ) -> str: ...
 
@@ -555,7 +555,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         logger.info(f"Populated connections for workbook (ID: {workbook_item.id})")
 
     def _get_workbook_connections(
-        self, workbook_item: WorkbookItem, req_options: Optional["RequestOptions"] = None
+        self, workbook_item: WorkbookItem, req_options: "RequestOptions | None" = None
     ) -> list[ConnectionItem]:
         url = f"{self.baseurl}/{workbook_item.id}/connections"
         server_response = self.get_request(url, req_options)
@@ -563,7 +563,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         return connections
 
     @api(version="3.4")
-    def populate_pdf(self, workbook_item: WorkbookItem, req_options: Optional["PDFRequestOptions"] = None) -> None:
+    def populate_pdf(self, workbook_item: WorkbookItem, req_options: "PDFRequestOptions | None" = None) -> None:
         """
         Populates the PDF for the specified workbook item. Get the pdf of the
         entire workbook if its tabs are enabled, pdf of the default view if its
@@ -611,16 +611,14 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         workbook_item._set_pdf(pdf_fetcher)
         logger.info(f"Populated pdf for workbook (ID: {workbook_item.id})")
 
-    def _get_wb_pdf(self, workbook_item: WorkbookItem, req_options: Optional["PDFRequestOptions"]) -> bytes:
+    def _get_wb_pdf(self, workbook_item: WorkbookItem, req_options: "PDFRequestOptions | None") -> bytes:
         url = f"{self.baseurl}/{workbook_item.id}/pdf"
         server_response = self.get_request(url, req_options)
         pdf = server_response.content
         return pdf
 
     @api(version="3.8")
-    def populate_powerpoint(
-        self, workbook_item: WorkbookItem, req_options: Optional["PPTXRequestOptions"] = None
-    ) -> None:
+    def populate_powerpoint(self, workbook_item: WorkbookItem, req_options: "PPTXRequestOptions | None" = None) -> None:
         """
         Populates the PowerPoint for the specified workbook item.
 
@@ -661,7 +659,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         workbook_item._set_powerpoint(pptx_fetcher)
         logger.info(f"Populated powerpoint for workbook (ID: {workbook_item.id})")
 
-    def _get_wb_pptx(self, workbook_item: WorkbookItem, req_options: Optional["PPTXRequestOptions"]) -> bytes:
+    def _get_wb_pptx(self, workbook_item: WorkbookItem, req_options: "PPTXRequestOptions | None") -> bytes:
         url = f"{self.baseurl}/{workbook_item.id}/powerpoint"
         server_response = self.get_request(url, req_options)
         pptx = server_response.content
@@ -775,7 +773,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         workbook_item: WorkbookItem,
         file: PathOrFileR,
         mode: str,
-        connections: Optional[Sequence[ConnectionItem]],
+        connections: Sequence[ConnectionItem] | None,
         as_job: Literal[False],
         skip_connection_check: bool,
         parameters=None,
@@ -787,7 +785,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         workbook_item: WorkbookItem,
         file: PathOrFileR,
         mode: str,
-        connections: Optional[Sequence[ConnectionItem]],
+        connections: Sequence[ConnectionItem] | None,
         as_job: Literal[True],
         skip_connection_check: bool,
         parameters=None,
@@ -801,7 +799,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         workbook_item: WorkbookItem,
         file: PathOrFileR,
         mode: str,
-        connections: Optional[Sequence[ConnectionItem]] = None,
+        connections: Sequence[ConnectionItem] | None = None,
         as_job: bool = False,
         skip_connection_check: bool = False,
         parameters=None,
@@ -1022,7 +1020,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         logger.info(f"Populated revisions for workbook (ID: {workbook_item.id})")
 
     def _get_workbook_revisions(
-        self, workbook_item: WorkbookItem, req_options: Optional["RequestOptions"] = None
+        self, workbook_item: WorkbookItem, req_options: "RequestOptions | None" = None
     ) -> list[RevisionItem]:
         url = f"{self.baseurl}/{workbook_item.id}/revisions"
         server_response = self.get_request(url, req_options)
@@ -1033,12 +1031,12 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
 
     @overload
     def download_revision(
-        self, workbook_id: str, revision_number: Optional[str], filepath: T, include_extract: bool
+        self, workbook_id: str, revision_number: str | None, filepath: T, include_extract: bool
     ) -> T: ...
 
     @overload
     def download_revision(
-        self, workbook_id: str, revision_number: Optional[str], filepath: Optional[FilePath], include_extract: bool
+        self, workbook_id: str, revision_number: str | None, filepath: FilePath | None, include_extract: bool
     ) -> str: ...
 
     # Download 1 workbook revision by revision number
@@ -1237,7 +1235,7 @@ class Workbooks(QuerysetEndpoint[WorkbookItem], TaggingMixin[WorkbookItem]):
         """
         return super().update_tags(item)
 
-    def filter(self, *invalid, page_size: Optional[int] = None, **kwargs) -> QuerySet[WorkbookItem]:
+    def filter(self, *invalid, page_size: int | None = None, **kwargs) -> QuerySet[WorkbookItem]:
         """
         Queries the Tableau Server for items using the specified filters. Page
         size can be specified to limit the number of items returned in a single
